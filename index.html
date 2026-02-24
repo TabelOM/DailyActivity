@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Activity Dashboard - Final Revision</title>
+    <title>Daily Activity Dashboard - Validation Ready</title>
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
         :root { 
             --primary: #1e3a8a; --secondary: #f1f5f9; --accent: #0ea5e9;
             --success: #16a34a; --danger: #dc2626; --text: #334155;
-            /* Type Colors */
             --clr-instrument: #8b5cf6; --clr-electrical: #f59e0b;
             --clr-rotating: #ec4899; --clr-stationary: #06b6d4;
         }
@@ -41,6 +40,8 @@
         }
         
         .form-label { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #64748b; }
+        .required { color: var(--danger); margin-left: 2px; }
+
         .btn-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-bottom: 18px; }
         .btn-option { 
             border: 1px solid #e2e8f0; background: white; padding: 12px; 
@@ -62,15 +63,10 @@
             border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; font-family: inherit;
         }
 
-        /* Buttons */
-        .btn-main { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .submit-container { display: flex; justify-content: center; gap: 15px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
         .btn-save { background: var(--primary); color: white; border: none; padding: 12px 60px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
         
-        .action-icons { display: flex; gap: 12px; justify-content: center; }
-        .icon-btn { cursor: pointer; border: none; background: none; padding: 4px; transition: transform 0.1s; }
-        .icon-btn:hover { transform: scale(1.1); }
-        
+        .icon-btn { cursor: pointer; border: none; background: none; padding: 4px; }
         #conditionalDone { display: none; background: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--accent); }
     </style>
 </head>
@@ -78,7 +74,7 @@
 
 <div class="header">
     <h2 style="margin:0">Monitoring Harian</h2>
-    <button class="btn-main" onclick="openModal()">
+    <button onclick="openModal()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:8px;">
         <i data-feather="plus-circle"></i> Tambah Data
     </button>
 </div>
@@ -111,7 +107,7 @@
             <input type="hidden" id="formAction" value="Add">
             <input type="hidden" id="ID">
 
-            <label class="form-label">Type Selection</label>
+            <label class="form-label">Type Selection<span class="required">*</span></label>
             <div class="btn-group" id="groupType">
                 <div class="btn-option opt-type" data-val="INSTRUMENT" onclick="selectOption('type', 'INSTRUMENT')">INSTRUMENT</div>
                 <div class="btn-option opt-type" data-val="ELECTRICAL" onclick="selectOption('type', 'ELECTRICAL')">ELECTRICAL</div>
@@ -122,35 +118,35 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div>
-                    <label class="form-label">Tanggal Kerusakan</label>
+                    <label class="form-label">Tanggal Kerusakan<span class="required">*</span></label>
                     <input type="date" id="tanggalKerusakan">
                 </div>
                 <div>
                     <label class="form-label">No ESPK</label>
-                    <input type="text" id="ESPK" placeholder="Saran: ...">
+                    <input type="text" id="ESPK" placeholder="Opsional">
                 </div>
             </div>
 
-            <label class="form-label">Activity</label>
-            <input type="text" id="activity">
+            <label class="form-label">Activity<span class="required">*</span></label>
+            <input type="text" id="activity" placeholder="Ketik aktivitas perbaikan...">
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div>
-                    <label class="form-label">Area</label>
-                    <input list="areaList" id="area" placeholder="Pilih/Ketik...">
+                    <label class="form-label">Area<span class="required">*</span></label>
+                    <input list="areaList" id="area" placeholder="Pilih/Ketik Area...">
                 </div>
                 <div>
-                    <label class="form-label">Tag Number</label>
-                    <input list="tagList" id="tagNumber" placeholder="Pilih/Ketik...">
+                    <label class="form-label">Tag Number<span class="required">*</span></label>
+                    <input list="tagList" id="tagNumber" placeholder="Pilih/Ketik Tag...">
                 </div>
             </div>
             <datalist id="areaList"></datalist>
             <datalist id="tagList"></datalist>
 
-            <label class="form-label">Description</label>
-            <textarea id="desc" rows="2"></textarea>
+            <label class="form-label">Description<span class="required">*</span></label>
+            <textarea id="desc" rows="2" placeholder="Detail kerusakan atau perbaikan..."></textarea>
 
-            <label class="form-label">Current Status</label>
+            <label class="form-label">Current Status<span class="required">*</span></label>
             <div class="btn-group" id="groupStatus">
                 <div class="btn-option opt-status" data-val="NOT YET" onclick="selectOption('status', 'NOT YET')">NOT YET</div>
                 <div class="btn-option opt-status" data-val="PROGRES" onclick="selectOption('status', 'PROGRES')">PROGRES</div>
@@ -159,7 +155,7 @@
             <input type="hidden" id="status">
 
             <div id="conditionalDone">
-                <label class="form-label" style="color: var(--primary);">Tanggal Selesai Perbaikan</label>
+                <label class="form-label" style="color: var(--primary);">Tanggal Selesai Perbaikan<span class="required">*</span></label>
                 <input type="date" id="tanggalSelesai">
             </div>
 
@@ -212,7 +208,7 @@
                     <td>${row.desc || '-'}</td>
                     <td><span class="status-badge ${statusClass}">${row.status || 'N/A'}</span></td>
                     <td>
-                        <div class="action-icons">
+                        <div style="display:flex; gap:12px; justify-content:center;">
                             <button class="icon-btn" style="color:#eab308" onclick='editRow(${JSON.stringify(row)})'><i data-feather="edit-3"></i></button>
                             <button class="icon-btn" style="color:var(--danger)" onclick="deleteRow('${row.ID}')"><i data-feather="trash-2"></i></button>
                         </div>
@@ -237,15 +233,15 @@
             if(btn.getAttribute('data-val') === value) btn.classList.add('active');
         });
 
-        // Logika Kondisional untuk Status DONE
         if (id === 'status') {
             const doneDiv = document.getElementById('conditionalDone');
             if (value === 'DONE') {
                 doneDiv.style.display = 'block';
-                document.getElementById('tanggalSelesai').value = new Date().toISOString().split('T')[0];
+                if(!document.getElementById('tanggalSelesai').value) {
+                    document.getElementById('tanggalSelesai').value = new Date().toISOString().split('T')[0];
+                }
             } else {
                 doneDiv.style.display = 'none';
-                document.getElementById('tanggalSelesai').value = '';
             }
         }
     }
@@ -254,20 +250,48 @@
         document.getElementById('dataForm').reset();
         document.getElementById('ID').value = 'ID-' + Math.random().toString(36).substr(2, 9).toUpperCase();
         document.getElementById('formAction').value = 'Add';
-        
-        // Initial Values
         document.getElementById('tanggalKerusakan').value = new Date().toISOString().split('T')[0];
         document.getElementById('ESPK').value = localStorage.getItem('last_espk') || '';
+        document.getElementById('conditionalDone').style.display = 'none';
         
-        selectOption('status', 'PROGRES'); // Initial status PROGRES
-        document.querySelectorAll('.btn-option').forEach(b => b.classList.remove('active'));
-        
+        selectOption('status', 'PROGRES');
+        document.querySelectorAll('#groupType .btn-option').forEach(b => b.classList.remove('active'));
         document.getElementById('modalOverlay').style.display = 'flex';
     }
 
     function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
 
     async function handleSubmit() {
+        // --- LOGIKA VALIDASI ---
+        const fields = [
+            { id: 'type', label: 'Type' },
+            { id: 'tanggalKerusakan', label: 'Tanggal Kerusakan' },
+            { id: 'activity', label: 'Activity' },
+            { id: 'area', label: 'Area' },
+            { id: 'tagNumber', label: 'Tag Number' },
+            { id: 'desc', label: 'Description' },
+            { id: 'status', label: 'Status' }
+        ];
+
+        for (let field of fields) {
+            const val = document.getElementById(field.id).value.trim();
+            if (!val) {
+                alert(`Kolom ${field.label} wajib diisi!`);
+                if(document.getElementById(field.id).type !== 'hidden') document.getElementById(field.id).focus();
+                return;
+            }
+        }
+
+        // Validasi Khusus untuk Status DONE
+        const status = document.getElementById('status').value;
+        const tglSelesai = document.getElementById('tanggalSelesai').value;
+        if (status === 'DONE' && !tglSelesai) {
+            alert('Tanggal Selesai Perbaikan wajib diisi jika status DONE!');
+            document.getElementById('tanggalSelesai').focus();
+            return;
+        }
+        // ------------------------
+
         const payload = {
             "Action": document.getElementById('formAction').value,
             "Rows": [{
@@ -279,20 +303,24 @@
                 "area": document.getElementById('area').value,
                 "tagNumber": document.getElementById('tagNumber').value,
                 "desc": document.getElementById('desc').value,
-                "status": document.getElementById('status').value,
-                "tanggalSelesai": document.getElementById('tanggalSelesai').value
+                "status": status,
+                "tanggalSelesai": tglSelesai
             }]
         };
 
         localStorage.setItem('last_espk', document.getElementById('ESPK').value);
 
-        await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'ApplicationAccessKey': CONFIG.accessKey, 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        closeModal();
-        fetchData();
+        try {
+            const res = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'ApplicationAccessKey': CONFIG.accessKey, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if(res.ok) {
+                closeModal();
+                fetchData();
+            }
+        } catch (e) { alert('Gagal menyimpan data ke AppSheet.'); }
     }
 
     function editRow(row) {
@@ -311,7 +339,7 @@
     }
 
     async function deleteRow(id) {
-        if(!confirm('Hapus data?')) return;
+        if(!confirm('Hapus data ini secara permanen?')) return;
         await fetch(apiUrl, {
             method: 'POST',
             headers: { 'ApplicationAccessKey': CONFIG.accessKey, 'Content-Type': 'application/json' },
