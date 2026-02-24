@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Activity Dashboard</title>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        :root { 
+            --primary: #1e3a8a; --secondary: #f1f5f9; --accent: #0ea5e9;
+            --success: #16a34a; --danger: #dc2626; --text: #334155;
+        }
+        
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; color: var(--text); }
+        
+        /* Layout */
+        .header { background: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .main-content { padding: 2rem 5%; }
+        
+        /* Table Styling */
+        .table-container { background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        th { background: #f8fafc; padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e2e8f0; font-size: 0.85rem; text-transform: uppercase; }
+        td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
+        .badge-progres { background: #dcfce7; color: #166534; }
+        .badge-done { background: #1e3a8a; color: white; }
+        .badge-notyet { background: #f1f5f9; color: #64748b; }
+
+        /* Modal */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content { 
+            background: white; width: 90%; max-width: 600px; max-height: 90vh; 
+            border-radius: 12px; padding: 25px; overflow-y: auto; position: relative;
+        }
+        
+        /* Form Inputs */
+        .form-label { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #64748b; }
+        .btn-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-bottom: 18px; }
+        .btn-option { 
+            border: 1px solid #e2e8f0; background: white; padding: 10px; 
+            border-radius: 4px; cursor: pointer; text-align: center; font-size: 0.8rem; transition: 0.2s;
+        }
+        .btn-option.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        input, select, textarea { 
+            width: 100%; padding: 10px; border: 1px solid #e2e8f0; 
+            border-radius: 6px; margin-bottom: 15px; box-sizing: border-box; font-family: inherit;
+        }
+
+        /* Buttons */
+        .btn-main { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .btn-save { background: var(--primary); width: 100%; padding: 12px; font-weight: bold; margin-top: 10px; }
+        .action-icons { display: flex; gap: 15px; }
+        .icon-btn { cursor: pointer; border: none; background: none; padding: 4px; transition: 0.2s; }
+        .icon-edit { color: #eab308; }
+        .icon-del { color: var(--danger); }
+        .icon-btn:hover { transform: scale(1.2); }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2 style="margin:0">Monitoring Harian</h2>
+    <button class="btn-main" onclick="openModal()">
+        <i data-feather="plus-circle"></i> Tambah Data
+    </button>
+</div>
+
+<div class="main-content">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Tanggal Kerusakan</th>
+                    <th>No ESPK</th>
+                    <th>Activity</th>
+                    <th>Area</th>
+                    <th>Tag Number</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th style="text-align:center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+        <h3 id="modalTitle" style="margin-top:0">Form Activity</h3>
+        <form id="dataForm">
+            <input type="hidden" id="formAction" value="Add">
+            <input type="hidden" id="ID">
+
+            <label class="form-label">Type</label>
+            <div class="btn-group" id="groupType">
+                <div class="btn-option" onclick="selectOption('type', 'INSTRUMENT')">INSTRUMENT</div>
+                <div class="btn-option" onclick="selectOption('type', 'ELECTRICAL')">ELECTRICAL</div>
+                <div class="btn-option" onclick="selectOption('type', 'ROTATING')">ROTATING</div>
+                <div class="btn-option" onclick="selectOption('type', 'STATIONARY')">STATIONARY</div>
+            </div>
+            <input type="hidden" id="type" required>
+
+            <label class="form-label">Tanggal Kerusakan</label>
+            <input type="date" id="tanggalKerusakan">
+
+            <label class="form-label">No ESPK</label>
+            <input type="text" id="ESPK">
+
+            <label class="form-label">Activity</label>
+            <input type="text" id="activity">
+
+            <label class="form-label">Area</label>
+            <input type="text" id="area">
+
+            <label class="form-label">Tag Number</label>
+            <input type="text" id="tagNumber">
+
+            <label class="form-label">Description</label>
+            <textarea id="desc" rows="2"></textarea>
+
+            <label class="form-label">Status</label>
+            <div class="btn-group" id="groupStatus">
+                <div class="btn-option" onclick="selectOption('status', 'NOT YET')">NOT YET</div>
+                <div class="btn-option" onclick="selectOption('status', 'PROGRES')">PROGRES</div>
+                <div class="btn-option" onclick="selectOption('status', 'DONE')">DONE</div>
+            </div>
+            <input type="hidden" id="status" required>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn-main btn-save" onclick="handleSubmit()">SIMPAN</button>
+                <button type="button" onclick="closeModal()" style="background:#cbd5e1; border:none; padding:12px; border-radius:8px; cursor:pointer">BATAL</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const CONFIG = {
+        appId: '1474754a-c8a9-4660-aeef-d197abcbdf76',
+        accessKey: 'V2-uuT5Q-pHlJR-TdVlZ-lvl4W-3WkM2-kvQKN-HuHbl-KAcy6',
+        tableName: 'DailyActivity'
+    };
+
+    const apiUrl = `https://api.appsheet.com/api/v2/apps/${CONFIG.appId}/tables/${CONFIG.tableName}/Action`;
+
+    window.onload = () => {
+        fetchData();
+        feather.replace(); // Jalankan ikon
+    };
+
+    async function fetchData() {
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'ApplicationAccessKey': CONFIG.accessKey, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "Action": "Find", "Rows": [] })
+            });
+            const data = await response.json();
+            renderTable(data);
+        } catch (e) { console.error(e); }
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        data.forEach(row => {
+            const statusClass = row.status === 'DONE' ? 'badge-done' : (row.status === 'PROGRES' ? 'badge-progres' : 'badge-notyet');
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${row.type || '-'}</b></td>
+                    <td>${row.tanggalKerusakan || '-'}</td>
+                    <td>${row.ESPK || '-'}</td>
+                    <td>${row.activity || '-'}</td>
+                    <td>${row.area || '-'}</td>
+                    <td>${row.tagNumber || '-'}</td>
+                    <td>${row.desc || '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${row.status || 'N/A'}</span></td>
+                    <td>
+                        <div class="action-icons">
+                            <button class="icon-btn icon-edit" onclick='editRow(${JSON.stringify(row)})' title="Edit">
+                                <i data-feather="edit-3"></i>
+                            </button>
+                            <button class="icon-btn icon-del" onclick="deleteRow('${row.ID}')" title="Hapus">
+                                <i data-feather="trash-2"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        feather.replace();
+    }
+
+    function selectOption(id, value) {
+        document.getElementById(id).value = value;
+        const parentId = id === 'type' ? 'groupType' : 'groupStatus';
+        Array.from(document.getElementById(parentId).children).forEach(btn => {
+            btn.classList.remove('active');
+            if(btn.innerText === value) btn.classList.add('active');
+        });
+    }
+
+    function openModal() {
+        document.getElementById('dataForm').reset();
+        document.getElementById('ID').value = 'ID-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        document.getElementById('formAction').value = 'Add';
+        document.querySelectorAll('.btn-option').forEach(b => b.classList.remove('active'));
+        document.getElementById('modalOverlay').style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
+
+    async function handleSubmit() {
+        const action = document.getElementById('formAction').value;
+        const payload = {
+            "Action": action,
+            "Rows": [{
+                "ID": document.getElementById('ID').value,
+                "type": document.getElementById('type').value,
+                "tanggalKerusakan": document.getElementById('tanggalKerusakan').value,
+                "ESPK": document.getElementById('ESPK').value,
+                "activity": document.getElementById('activity').value,
+                "area": document.getElementById('area').value,
+                "tagNumber": document.getElementById('tagNumber').value,
+                "desc": document.getElementById('desc').value,
+                "status": document.getElementById('status').value
+            }]
+        };
+
+        await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'ApplicationAccessKey': CONFIG.accessKey, 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        closeModal();
+        fetchData();
+    }
+
+    function editRow(row) {
+        openModal();
+        document.getElementById('formAction').value = 'Edit';
+        document.getElementById('ID').value = row.ID;
+        document.getElementById('tanggalKerusakan').value = row.tanggalKerusakan;
+        document.getElementById('ESPK').value = row.ESPK;
+        document.getElementById('activity').value = row.activity;
+        document.getElementById('area').value = row.area;
+        document.getElementById('tagNumber').value = row.tagNumber;
+        document.getElementById('desc').value = row.desc;
+        selectOption('type', row.type);
+        selectOption('status', row.status);
+    }
+
+    async function deleteRow(id) {
+        if(!confirm('Hapus data?')) return;
+        await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'ApplicationAccessKey': CONFIG.accessKey, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ "Action": "Delete", "Rows": [{ "ID": id }] })
+        });
+        fetchData();
+    }
+</script>
+
+</body>
+</html>
