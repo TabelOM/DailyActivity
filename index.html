@@ -3,27 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Activity Dashboard</title>
+    <title>Daily Activity Dashboard - Final Revision</title>
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
         :root { 
             --primary: #1e3a8a; --secondary: #f1f5f9; --accent: #0ea5e9;
             --success: #16a34a; --danger: #dc2626; --text: #334155;
+            /* Type Colors */
+            --clr-instrument: #8b5cf6; --clr-electrical: #f59e0b;
+            --clr-rotating: #ec4899; --clr-stationary: #06b6d4;
         }
         
         body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; color: var(--text); }
-        
-        /* Layout */
         .header { background: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .main-content { padding: 2rem 5%; }
         
         /* Table Styling */
         .table-container { background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1100px; }
         th { background: #f8fafc; padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e2e8f0; font-size: 0.85rem; text-transform: uppercase; }
         td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         
-        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
+        /* Status Badges */
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; text-align: center; display: inline-block; min-width: 70px; }
         .badge-progres { background: #dcfce7; color: #166534; }
         .badge-done { background: #1e3a8a; color: white; }
         .badge-notyet { background: #f1f5f9; color: #64748b; }
@@ -34,32 +36,42 @@
             background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000;
         }
         .modal-content { 
-            background: white; width: 90%; max-width: 600px; max-height: 90vh; 
+            background: white; width: 95%; max-width: 650px; max-height: 90vh; 
             border-radius: 12px; padding: 25px; overflow-y: auto; position: relative;
         }
         
-        /* Form Inputs */
         .form-label { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #64748b; }
         .btn-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-bottom: 18px; }
         .btn-option { 
-            border: 1px solid #e2e8f0; background: white; padding: 10px; 
-            border-radius: 4px; cursor: pointer; text-align: center; font-size: 0.8rem; transition: 0.2s;
+            border: 1px solid #e2e8f0; background: white; padding: 12px; 
+            border-radius: 6px; cursor: pointer; text-align: center; font-size: 0.8rem; font-weight: 600; transition: 0.2s;
         }
-        .btn-option.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Dynamic Colors for Options */
+        .opt-type[data-val="INSTRUMENT"].active { background: var(--clr-instrument); color: white; border-color: var(--clr-instrument); }
+        .opt-type[data-val="ELECTRICAL"].active { background: var(--clr-electrical); color: white; border-color: var(--clr-electrical); }
+        .opt-type[data-val="ROTATING"].active { background: var(--clr-rotating); color: white; border-color: var(--clr-rotating); }
+        .opt-type[data-val="STATIONARY"].active { background: var(--clr-stationary); color: white; border-color: var(--clr-stationary); }
         
+        .opt-status[data-val="NOT YET"].active { background: #94a3b8; color: white; }
+        .opt-status[data-val="PROGRES"].active { background: var(--success); color: white; }
+        .opt-status[data-val="DONE"].active { background: var(--primary); color: white; }
+
         input, select, textarea { 
-            width: 100%; padding: 10px; border: 1px solid #e2e8f0; 
-            border-radius: 6px; margin-bottom: 15px; box-sizing: border-box; font-family: inherit;
+            width: 100%; padding: 12px; border: 1px solid #e2e8f0; 
+            border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; font-family: inherit;
         }
 
         /* Buttons */
         .btn-main { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .btn-save { background: var(--primary); width: 100%; padding: 12px; font-weight: bold; margin-top: 10px; }
-        .action-icons { display: flex; gap: 15px; }
-        .icon-btn { cursor: pointer; border: none; background: none; padding: 4px; transition: 0.2s; }
-        .icon-edit { color: #eab308; }
-        .icon-del { color: var(--danger); }
-        .icon-btn:hover { transform: scale(1.2); }
+        .submit-container { display: flex; justify-content: center; gap: 15px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
+        .btn-save { background: var(--primary); color: white; border: none; padding: 12px 60px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        
+        .action-icons { display: flex; gap: 12px; justify-content: center; }
+        .icon-btn { cursor: pointer; border: none; background: none; padding: 4px; transition: transform 0.1s; }
+        .icon-btn:hover { transform: scale(1.1); }
+        
+        #conditionalDone { display: none; background: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--accent); }
     </style>
 </head>
 <body>
@@ -87,57 +99,73 @@
                     <th style="text-align:center">Aksi</th>
                 </tr>
             </thead>
-            <tbody id="tableBody">
-                </tbody>
+            <tbody id="tableBody"></tbody>
         </table>
     </div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
-        <h3 id="modalTitle" style="margin-top:0">Form Activity</h3>
+        <h3 id="modalTitle" style="margin-top:0; color: var(--primary);">Form Activity</h3>
         <form id="dataForm">
             <input type="hidden" id="formAction" value="Add">
             <input type="hidden" id="ID">
 
-            <label class="form-label">Type</label>
+            <label class="form-label">Type Selection</label>
             <div class="btn-group" id="groupType">
-                <div class="btn-option" onclick="selectOption('type', 'INSTRUMENT')">INSTRUMENT</div>
-                <div class="btn-option" onclick="selectOption('type', 'ELECTRICAL')">ELECTRICAL</div>
-                <div class="btn-option" onclick="selectOption('type', 'ROTATING')">ROTATING</div>
-                <div class="btn-option" onclick="selectOption('type', 'STATIONARY')">STATIONARY</div>
+                <div class="btn-option opt-type" data-val="INSTRUMENT" onclick="selectOption('type', 'INSTRUMENT')">INSTRUMENT</div>
+                <div class="btn-option opt-type" data-val="ELECTRICAL" onclick="selectOption('type', 'ELECTRICAL')">ELECTRICAL</div>
+                <div class="btn-option opt-type" data-val="ROTATING" onclick="selectOption('type', 'ROTATING')">ROTATING</div>
+                <div class="btn-option opt-type" data-val="STATIONARY" onclick="selectOption('type', 'STATIONARY')">STATIONARY</div>
             </div>
-            <input type="hidden" id="type" required>
+            <input type="hidden" id="type">
 
-            <label class="form-label">Tanggal Kerusakan</label>
-            <input type="date" id="tanggalKerusakan">
-
-            <label class="form-label">No ESPK</label>
-            <input type="text" id="ESPK">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label class="form-label">Tanggal Kerusakan</label>
+                    <input type="date" id="tanggalKerusakan">
+                </div>
+                <div>
+                    <label class="form-label">No ESPK</label>
+                    <input type="text" id="ESPK" placeholder="Saran: ...">
+                </div>
+            </div>
 
             <label class="form-label">Activity</label>
             <input type="text" id="activity">
 
-            <label class="form-label">Area</label>
-            <input type="text" id="area">
-
-            <label class="form-label">Tag Number</label>
-            <input type="text" id="tagNumber">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label class="form-label">Area</label>
+                    <input list="areaList" id="area" placeholder="Pilih/Ketik...">
+                </div>
+                <div>
+                    <label class="form-label">Tag Number</label>
+                    <input list="tagList" id="tagNumber" placeholder="Pilih/Ketik...">
+                </div>
+            </div>
+            <datalist id="areaList"></datalist>
+            <datalist id="tagList"></datalist>
 
             <label class="form-label">Description</label>
             <textarea id="desc" rows="2"></textarea>
 
-            <label class="form-label">Status</label>
+            <label class="form-label">Current Status</label>
             <div class="btn-group" id="groupStatus">
-                <div class="btn-option" onclick="selectOption('status', 'NOT YET')">NOT YET</div>
-                <div class="btn-option" onclick="selectOption('status', 'PROGRES')">PROGRES</div>
-                <div class="btn-option" onclick="selectOption('status', 'DONE')">DONE</div>
+                <div class="btn-option opt-status" data-val="NOT YET" onclick="selectOption('status', 'NOT YET')">NOT YET</div>
+                <div class="btn-option opt-status" data-val="PROGRES" onclick="selectOption('status', 'PROGRES')">PROGRES</div>
+                <div class="btn-option opt-status" data-val="DONE" onclick="selectOption('status', 'DONE')">DONE</div>
             </div>
-            <input type="hidden" id="status" required>
+            <input type="hidden" id="status">
 
-            <div style="display: flex; gap: 10px;">
-                <button type="button" class="btn-main btn-save" onclick="handleSubmit()">SIMPAN</button>
-                <button type="button" onclick="closeModal()" style="background:#cbd5e1; border:none; padding:12px; border-radius:8px; cursor:pointer">BATAL</button>
+            <div id="conditionalDone">
+                <label class="form-label" style="color: var(--primary);">Tanggal Selesai Perbaikan</label>
+                <input type="date" id="tanggalSelesai">
+            </div>
+
+            <div class="submit-container">
+                <button type="button" class="btn-save" onclick="handleSubmit()">SIMPAN</button>
+                <button type="button" onclick="closeModal()" style="background:#f1f5f9; border:none; padding:12px 30px; border-radius:8px; cursor:pointer; font-weight:600;">BATAL</button>
             </div>
         </form>
     </div>
@@ -151,11 +179,9 @@
     };
 
     const apiUrl = `https://api.appsheet.com/api/v2/apps/${CONFIG.appId}/tables/${CONFIG.tableName}/Action`;
+    let globalData = [];
 
-    window.onload = () => {
-        fetchData();
-        feather.replace(); // Jalankan ikon
-    };
+    window.onload = () => { fetchData(); feather.replace(); };
 
     async function fetchData() {
         try {
@@ -164,8 +190,9 @@
                 headers: { 'ApplicationAccessKey': CONFIG.accessKey, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ "Action": "Find", "Rows": [] })
             });
-            const data = await response.json();
-            renderTable(data);
+            globalData = await response.json();
+            renderTable(globalData);
+            updateDatalists();
         } catch (e) { console.error(e); }
     }
 
@@ -176,7 +203,7 @@
             const statusClass = row.status === 'DONE' ? 'badge-done' : (row.status === 'PROGRES' ? 'badge-progres' : 'badge-notyet');
             tbody.innerHTML += `
                 <tr>
-                    <td><b>${row.type || '-'}</b></td>
+                    <td><span style="border-left: 4px solid var(--clr-${row.type?.toLowerCase()}); padding-left: 8px;"><b>${row.type || '-'}</b></span></td>
                     <td>${row.tanggalKerusakan || '-'}</td>
                     <td>${row.ESPK || '-'}</td>
                     <td>${row.activity || '-'}</td>
@@ -186,18 +213,20 @@
                     <td><span class="status-badge ${statusClass}">${row.status || 'N/A'}</span></td>
                     <td>
                         <div class="action-icons">
-                            <button class="icon-btn icon-edit" onclick='editRow(${JSON.stringify(row)})' title="Edit">
-                                <i data-feather="edit-3"></i>
-                            </button>
-                            <button class="icon-btn icon-del" onclick="deleteRow('${row.ID}')" title="Hapus">
-                                <i data-feather="trash-2"></i>
-                            </button>
+                            <button class="icon-btn" style="color:#eab308" onclick='editRow(${JSON.stringify(row)})'><i data-feather="edit-3"></i></button>
+                            <button class="icon-btn" style="color:var(--danger)" onclick="deleteRow('${row.ID}')"><i data-feather="trash-2"></i></button>
                         </div>
                     </td>
-                </tr>
-            `;
+                </tr>`;
         });
         feather.replace();
+    }
+
+    function updateDatalists() {
+        const areas = [...new Set(globalData.map(item => item.area).filter(Boolean))];
+        const tags = [...new Set(globalData.map(item => item.tagNumber).filter(Boolean))];
+        document.getElementById('areaList').innerHTML = areas.map(a => `<option value="${a}">`).join('');
+        document.getElementById('tagList').innerHTML = tags.map(t => `<option value="${t}">`).join('');
     }
 
     function selectOption(id, value) {
@@ -205,24 +234,42 @@
         const parentId = id === 'type' ? 'groupType' : 'groupStatus';
         Array.from(document.getElementById(parentId).children).forEach(btn => {
             btn.classList.remove('active');
-            if(btn.innerText === value) btn.classList.add('active');
+            if(btn.getAttribute('data-val') === value) btn.classList.add('active');
         });
+
+        // Logika Kondisional untuk Status DONE
+        if (id === 'status') {
+            const doneDiv = document.getElementById('conditionalDone');
+            if (value === 'DONE') {
+                doneDiv.style.display = 'block';
+                document.getElementById('tanggalSelesai').value = new Date().toISOString().split('T')[0];
+            } else {
+                doneDiv.style.display = 'none';
+                document.getElementById('tanggalSelesai').value = '';
+            }
+        }
     }
 
     function openModal() {
         document.getElementById('dataForm').reset();
         document.getElementById('ID').value = 'ID-' + Math.random().toString(36).substr(2, 9).toUpperCase();
         document.getElementById('formAction').value = 'Add';
+        
+        // Initial Values
+        document.getElementById('tanggalKerusakan').value = new Date().toISOString().split('T')[0];
+        document.getElementById('ESPK').value = localStorage.getItem('last_espk') || '';
+        
+        selectOption('status', 'PROGRES'); // Initial status PROGRES
         document.querySelectorAll('.btn-option').forEach(b => b.classList.remove('active'));
+        
         document.getElementById('modalOverlay').style.display = 'flex';
     }
 
     function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
 
     async function handleSubmit() {
-        const action = document.getElementById('formAction').value;
         const payload = {
-            "Action": action,
+            "Action": document.getElementById('formAction').value,
             "Rows": [{
                 "ID": document.getElementById('ID').value,
                 "type": document.getElementById('type').value,
@@ -232,9 +279,12 @@
                 "area": document.getElementById('area').value,
                 "tagNumber": document.getElementById('tagNumber').value,
                 "desc": document.getElementById('desc').value,
-                "status": document.getElementById('status').value
+                "status": document.getElementById('status').value,
+                "tanggalSelesai": document.getElementById('tanggalSelesai').value
             }]
         };
+
+        localStorage.setItem('last_espk', document.getElementById('ESPK').value);
 
         await fetch(apiUrl, {
             method: 'POST',
@@ -257,6 +307,7 @@
         document.getElementById('desc').value = row.desc;
         selectOption('type', row.type);
         selectOption('status', row.status);
+        if(row.status === 'DONE') document.getElementById('tanggalSelesai').value = row.tanggalSelesai;
     }
 
     async function deleteRow(id) {
